@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四つの星命秘録 by Sumiko Ellington</title>
+<style>
+  body { font-family: sans-serif; max-width: 640px; margin: 0 auto; padding: 0 10px 20px; background: #0f0f1a; color: #e2e8f0; }
+  .top-image { width: 100%; display: block; border-radius: 0 0 8px 8px; }
+  .app-subtitle { text-align: center; font-size: 0.85em; color: #94a3b8; margin: 8px 0 16px; letter-spacing: 1px; }
+  fieldset { margin-bottom: 12px; border: 1px solid #3a3a5c; border-radius: 6px; padding: 10px 14px; background: #1a1a2e; }
+  legend { color: #ffd27f; font-size: 0.9em; padding: 0 6px; }
+  label { display: block; margin: 6px 0; color: #cbd5e1; }
+  input[type="number"], input[type="text"] { background: #2d2d44; border: 1px solid #4a4a6a; color: #e2e8f0; padding: 4px 8px; border-radius: 4px; }
+  button { padding: 10px 20px; margin-top: 10px; cursor: pointer; background: linear-gradient(135deg, #6d28d9, #4c1d95); color: #fff; border: none; border-radius: 8px; font-size: 1em; }
+  button:hover { opacity: 0.9; }
+  .hidden { display: none; }
+  .img-choice { display: inline-flex; width: 90px; height: 90px; margin: 6px; text-align:center;
+    border: 3px solid #3a3a5c; cursor: pointer; align-items: center; justify-content: center;
+    font-size: 2em; border-radius: 8px; background: #1a1a2e; overflow: hidden; }
+  .img-choice.selected { border-color: #ffd27f; box-shadow: 0 0 12px rgba(255,210,127,0.5); }
+  #diceArea { display: flex; gap: 24px; margin-top: 12px; align-items: center; }
+  .dice-wrap { text-align: center; }
+  .dice-label { font-size: 0.8em; color: #94a3b8; margin: 0 0 4px; }
+  .dice { width: 90px; height: 90px; border-radius: 12px; display: flex; align-items: center;
+    justify-content: center; font-size: 1.6em; font-weight: bold; color: #fff;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.6); transition: transform 0.1s;
+    position: relative; overflow: hidden; }
+  .dice img.dice-bg { position: absolute; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+  .dice span.dice-num { position: relative; z-index: 1; text-shadow: 0 0 8px #000, 0 0 4px #000; font-size: 1.4em; }
+  .dice.rolling { animation: shake 0.08s infinite; }
+  @keyframes shake {
+    0%   { transform: rotate(-8deg) scale(1.05); }
+    50%  { transform: rotate(8deg) scale(0.95); }
+    100% { transform: rotate(-8deg) scale(1.05); }
+  }
+  .dice.landed { animation: land 0.3s ease-out; }
+  @keyframes land {
+    0%   { transform: scale(1.3); }
+    60%  { transform: scale(0.92); }
+    100% { transform: scale(1); }
+  }
+  .section { border-top: 1px solid #2d2d44; padding-top: 10px; margin-top: 10px; }
+  h2 { margin-bottom: 4px; color: #ffd27f; }
+  .small { color: #94a3b8; font-size: 0.85em; }
+  .letter { font-family: "Hiragino Mincho ProN", serif; line-height: 1.9; color: #e2e8f0; }
+  .letter h1 { font-size: 1.3em; border-bottom: 1px solid #3a3a5c; padding-bottom: 8px; color: #ffd27f; }
+  .letter h2 { font-size: 1.05em; color: #a78bfa; }
+  .letter p { margin: 8px 0; }
+  .section.highlight { background: #1e1040; padding: 12px; border-radius: 6px; border-top: none; }
+  .keyword { font-size: 1.3em; font-weight: bold; letter-spacing: 1px; color: #a78bfa; }
+  .closing { margin-top: 20px; text-align: right; color: #94a3b8; }
+  .signature { font-style: italic; color: #ffd27f; }
+  .score-board { background: linear-gradient(135deg, #1a1a2e, #2d1b4e); color: #fff; padding: 14px 16px; border-radius: 8px; margin-bottom: 14px; border: 1px solid #4a1d96; }
+  .score-rank, .score-points { margin: 4px 0; }
+  .score-board .big { font-size: 1.6em; font-weight: bold; color: #ffd27f; }
+  .score-board .small-text { font-size: 0.8em; color: #94a3b8; }
+  .keyword-ja { font-size: 0.7em; color: #94a3b8; font-weight: normal; }
+  #shareCard { background: linear-gradient(135deg, #1a1a2e 0%, #2d1b4e 100%); color: #fff;
+    padding: 20px; border-radius: 12px; margin-top: 20px; font-family: sans-serif; }
+  .share-title { font-size: 1.1em; color: #ffd27f; font-weight: bold; margin: 0 0 10px; }
+  .share-stats { display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.85em; color: #ccc; margin-bottom: 8px; }
+  .share-stats span { background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 20px; }
+  .share-keyword { font-size: 1.4em; font-weight: bold; color: #a78bfa; margin: 8px 0; }
+  .share-msg { font-size: 0.9em; line-height: 1.6; color: #e2e8f0; margin: 8px 0; }
+  .share-encouragement { font-size: 0.9em; color: #fbbf24; margin: 8px 0; }
+  .share-date { font-size: 0.75em; color: #94a3b8; margin: 10px 0 4px; }
+  .share-footer { font-size: 0.75em; color: #64748b; margin: 0; }
+  .share-guide { font-size: 0.85em; color: #94a3b8; background: #1a1a2e; border-left: 3px solid #a78bfa; padding: 8px 12px; border-radius: 4px; margin-top: 16px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<img src="top.png" alt="四つの星命秘録" class="top-image">
+<p class="app-subtitle">星座・血液型・数秘・マヤ暦コードが導く、あなただけの占い</p>
+
+<div id="formArea">
+  <fieldset>
+    <legend>お名前・ニックネーム（任意・シェア画像に表示されます）</legend>
+    <label><input type="text" id="xAccount" placeholder="例: Sumiko、さくら、@fortune_lover" style="width:220px"></label>
+    <p class="small">表示名・ニックネーム・Xのアカウント名など、お好きな名前でどうぞ</p>
+  </fieldset>
+
+  <fieldset>
+    <legend>生年月日（保存はされません）</legend>
+    <label>西暦年: <input type="number" id="birthYear" min="1900" max="2026" placeholder="例: 1992"></label>
+    <label>月: <input type="number" id="birthMonth" min="1" max="12" placeholder="例: 5"></label>
+    <label>日: <input type="number" id="birthDay" min="1" max="31" placeholder="例: 2"></label>
+  </fieldset>
+
+  <fieldset>
+    <legend>血液型</legend>
+    <label><input type="radio" name="blood" value="A"> A型</label>
+    <label><input type="radio" name="blood" value="B"> B型</label>
+    <label><input type="radio" name="blood" value="O"> O型</label>
+    <label><input type="radio" name="blood" value="AB"> AB型</label>
+  </fieldset>
+
+  <fieldset>
+    <legend>好きな数字（1〜12）</legend>
+    <input type="number" id="luckyNumber" min="1" max="12">
+  </fieldset>
+
+  <fieldset>
+    <legend>今日のテーマ「<span id="themeName"></span>」から直感で1枚選んでください</legend>
+    <div id="imageChoices"></div>
+  </fieldset>
+
+  <button id="rollDiceBtn">🎲 サイコロを振る</button>
+  <div id="diceArea" class="hidden">
+    <div class="dice-wrap">
+      <p class="dice-label">表層（赤）</p>
+      <div class="dice" id="redDice">
+        <img src="dice_red.jpg" alt="赤サイコロ" class="dice-bg">
+        <span class="dice-num">?</span>
+      </div>
+    </div>
+    <div class="dice-wrap">
+      <p class="dice-label">深層（水色）</p>
+      <div class="dice" id="blueDice">
+        <img src="dice_blue.jpg" alt="水色サイコロ" class="dice-bg">
+        <span class="dice-num">?</span>
+      </div>
+    </div>
+  </div>
+
+  <br>
+  <button id="submitBtn">占い結果を見る</button>
+</div>
+
+<div id="resultArea" class="hidden"></div>
+
+<script>
+// ---------- データ定義（最小限の仮データ） ----------
+
+const zodiacList = [
+  {name:"山羊座", start:[1,1], end:[1,19]},
+  {name:"水瓶座", start:[1,20], end:[2,18]},
+  {name:"魚座", start:[2,19], end:[3,20]},
+  {name:"牡羊座", start:[3,21], end:[4,19]},
+  {name:"牡牛座", start:[4,20], end:[5,20]},
+  {name:"双子座", start:[5,21], end:[6,21]},
+  {name:"蟹座", start:[6,22], end:[7,22]},
+  {name:"獅子座", start:[7,23], end:[8,22]},
+  {name:"乙女座", start:[8,23], end:[9,22]},
+  {name:"天秤座", start:[9,23], end:[10,23]},
+  {name:"蠍座", start:[10,24], end:[11,22]},
+  {name:"射手座", start:[11,23], end:[12,21]},
+  {name:"山羊座2", start:[12,22], end:[12,31]}
+];
+
+const bloodTypeText = {
+  A: "慎重で責任感が強く、周囲との調和を大切にするタイプ。",
+  B: "自由でマイペース、自分の興味に正直に動けるタイプ。",
+  O: "おおらかで面倒見がよく、周囲を巻き込む力があるタイプ。",
+  AB: "冷静で多面的な視点を持ち、独自の世界観があるタイプ。"
+};
+
+// 今日の日付をシードにした擬似乱数（同じ日は誰がアクセスしても同じ結果になる）
+function seededRandom(seed) {
+  let x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
+function getTodaySeed() {
+  const now = new Date();
+  return now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+}
+
+const zodiacNames = ["牡羊座","牡牛座","双子座","蟹座","獅子座","乙女座","天秤座","蠍座","射手座","山羊座","水瓶座","魚座"];
+
+// 今日の12星座ランキングを算出（日付シードで毎日固定、星座ごとにスコアも算出）
+function getTodayZodiacRanking() {
+  const seed = getTodaySeed();
+  const scored = zodiacNames.map((name, i) => {
+    const r = seededRandom(seed + i * 137); // 星座ごとに異なる種
+    const score = Math.floor(60 + r * 40); // 60〜99点の範囲でスコア化
+    return { name, score };
+  });
+  scored.sort((a, b) => b.score - a.score);
+  const ranking = {};
+  scored.forEach((item, idx) => {
+    ranking[item.name] = { rank: idx + 1, score: item.score };
+  });
+  return ranking;
+}
+
+// 太陽の紋章（20種類・仮の簡易データ）
+const sunSeals = [
+  "赤い龍","白い風","青い夜","黄色い種","赤い蛇","白い世界の橋渡し","青い手","黄色い星",
+  "赤い月","白い犬","青い猿","黄色い人","赤い空歩く人","白い魔法使い","青い鷲","黄色い戦士",
+  "赤い地球","白い鏡","青い嵐","黄色い太陽"
+];
+
+// 銀河の音（13種類・仮データ）
+const galacticTones = [
+  "磁石の音：目的","月の音：挑戦","電気の音：奉仕","自己存在の音：型","倍音の音：共鳴",
+  "律動の音：平等","共振の音：調律","銀河の音：誠実","太陽の音：意図","惑星の音：完成",
+  "スペクトルの音：解放","水晶の音：協力","宇宙の音：存在"
+];
+
+// 数秘術：ライフパスナンバー算出（マスターナンバー11/22/33は還元しない）
+function calcLifePathNumber(y, m, d) {
+  const digits = (String(y) + String(m) + String(d)).split("").map(Number);
+  let sum = digits.reduce((a,b)=>a+b, 0);
+  while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+    sum = String(sum).split("").map(Number).reduce((a,b)=>a+b, 0);
+    if (sum === 11 || sum === 22 || sum === 33) break;
+  }
+  return sum;
+}
+
+// ライフパスナンバーの意味（1-9, 11, 22, 33）
+const lifePathText = {
+  1: "自分の足で道を切りひらく力。誰かの後についていくよりも、最初の一歩を自分で踏み出すときに、本来の輝きが顔を出します。",
+  2: "誰かと誰かをそっとつなぐ、橋渡しの力。声高に主張するよりも、寄り添い、調和をつくることであなたらしさが発揮されます。",
+  3: "言葉や表現を通して、人の心をふっと軽くする力。楽しむこと、表現することそのものが、あなたの才能の源です。",
+  4: "一つひとつを積み上げていく、確かな力。地道な努力が、いつか揺るがない土台になることを、あなたはどこかで知っています。",
+  5: "変化と自由を愛する、風のような力。同じ場所にとどまり続けるよりも、新しい景色の中でこそ本領を発揮します。",
+  6: "誰かを思いやり、支える力。愛情深く、責任感を持って周囲を包み込むことに、深い喜びを感じるタイプです。",
+  7: "物事の奥にある本質を見抜く、静かな力。一人の時間の中で、誰よりも深く考え、答えを見つけていく人です。",
+  8: "現実を動かし、形にしていく力。目に見える成果や豊かさを生み出すことに長け、人を導く器を持っています。",
+  9: "多くの人を包み込む、広い心を持つ力。自分のためというより、誰かのために生きるときに、最大の力を発揮します。",
+  11: "直感とひらめきで人を照らす、特別な力。繊細さゆえに揺れることもありますが、その感受性こそがあなたの宝物です。",
+  22: "大きな夢を現実に変えていく、稀有な力。理想を語るだけでなく、実際に形にしていくことができる人です。",
+  33: "無条件の愛で人を包み込む、深い力。多くを与え、多くを癒すことができる、特別な使命を持った人です。"
+};
+// マヤ暦には「閏年の2月29日は独立したKINとしてカウントしない（前日と同じKIN扱い）」という
+// 独自ルールがあるため、単純な日数差ではなく、2/29を除外した通算日数で計算する。
+function isLeapYear(y) {
+  return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+}
+
+function mayaDayCount(y, m, d) {
+  const serial = Date.UTC(y, m - 1, d) / 86400000;
+  const baseSerial = Date.UTC(1900, 0, 1) / 86400000;
+  let days = serial - baseSerial;
+
+  // 1900/1/1～対象日の間にある「2/29」の数を引く
+  let leapDaysPassed = 0;
+  for (let yr = 1900; yr < y; yr++) {
+    if (isLeapYear(yr)) leapDaysPassed++;
+  }
+  if (isLeapYear(y) && (m > 2 || (m === 2 && d >= 29))) leapDaysPassed++;
+
+  return days - leapDaysPassed;
+}
+
+// 検証済みオフセット（1967/10/28 = KIN108 を基準に算出）
+const KIN_OFFSET = 107 - mayaDayCount(1967, 10, 28);
+
+function calcKin(y, m, d) {
+  const count = mayaDayCount(y, m, d);
+  return ((count + KIN_OFFSET) % 260 + 260) % 260 + 1;
+}
+
+function getZodiac(m, d) {
+  for (const z of zodiacList) {
+    const [sm, sd] = z.start;
+    const [em, ed] = z.end;
+    if (sm === em) {
+      if (m === sm && d >= sd && d <= ed) return z.name.replace("2","");
+    } else if (sm < em) {
+      if ((m === sm && d >= sd) || (m === em && d <= ed) || (m > sm && m < em)) return z.name.replace("2","");
+    } else {
+      if ((m === sm && d >= sd) || (m === em && d <= ed)) return z.name.replace("2","");
+    }
+  }
+  return "不明";
+}
+
+// 赤サイコロ：1-3仕事運 4-6対人運 7-9金運 10-12恋愛運（各3段階強度）
+const redThemes = ["仕事運","対人運","金運","恋愛運"];
+const intensityLabels = ["弱","中","強"];
+function getRedResult(n) {
+  const idx = Math.floor((n - 1) / 3); // 0-3
+  const intensity = (n - 1) % 3; // 0-2
+  return { theme: redThemes[idx], intensity: intensityLabels[intensity] };
+}
+
+// 水色サイコロ：1-3過去 4-6現在 7-9未来 10-12直感
+const blueThemes = ["過去","現在","未来","直感"];
+const blueKeywords = {
+  "過去": { en: "Reflection", ja: "振り返り" },
+  "現在": { en: "Presence", ja: "今ここに" },
+  "未来": { en: "Hope", ja: "希望" },
+  "直感": { en: "Intuition", ja: "直感" }
+};
+function getBlueResult(n) {
+  const idx = Math.floor((n - 1) / 3);
+  const intensity = (n - 1) % 3;
+  return { theme: blueThemes[idx], intensity: intensityLabels[intensity] };
+}
+
+// 赤テーマ別のラッキーアイテム（買い物・食事・服装・情報なども含む）
+const redLuckyItems = {
+  "仕事運": [
+    "今日は文房具屋に立ち寄って、新しいペンを一本だけ買ってみてください。",
+    "いつもと違うカフェで仕事をすると、思いがけないアイデアが浮かびそうです。",
+    "本屋で直感的に手に取った本が、今のあなたに必要なヒントを持っているかもしれません。",
+    "白や紺のシンプルな服装が、今日の集中力を高めてくれそうです。",
+    "信頼できる人からの情報や口コミが、今日は特に力を持っています。"
+  ],
+  "対人運": [
+    "いつもより少し華やかなアクセサリーをつけると、誰かとの会話が弾みそうです。",
+    "今日の食事は一人より、誰かと一緒に食べることで運が動き出しそうです。",
+    "SNSで気になっていた人の投稿にコメントしてみると、思わぬ縁が広がるかもしれません。",
+    "ちょっと良いお茶やコーヒーを買って、誰かに「一緒にどうぞ」と差し出してみてください。",
+    "柔らかい色味の服を選ぶと、今日は自然と周りの人を安心させる存在になれそうです。"
+  ],
+  "金運": [
+    "今日は衝動買いより、ずっと欲しかったものを一つだけ丁寧に選んで買う日にしてください。",
+    "黄色や金色の小物を財布のそばに置いておくと、お金の流れが良くなりそうです。",
+    "食事は少し奮発して、普段より質の高いものを選ぶと満足感と運が一緒に上がります。",
+    "気になっていたサービスや講座の情報を調べてみると、投資すべきものが見えてきそうです。",
+    "今日のお買い物はレシートを丁寧に保管して。後で振り返ると大事な気づきがありそうです。"
+  ],
+  "恋愛運": [
+    "今日は香りを大切にしてみてください。好きな香水やボディクリームが気持ちを整えてくれます。",
+    "ピンクや赤など、温かみのある色の服やアクセサリーが今日のあなたの魅力を引き立てます。",
+    "好きな人や気になる人が好みそうなお菓子やドリンクをさりげなく差し入れてみると効果的です。",
+    "今日読んだ記事や見た映画の話を誰かとシェアすると、その会話が特別な時間になりそうです。",
+    "いつもより少しだけ丁寧に身だしなみを整えると、自分への自信が自然と伝わっていきます。"
+  ]
+};
+
+// 赤テーマ×強度別の「積極的に取り組むこと」「静観・様子見すること」
+const redActionGuidance = {
+  "仕事運": {
+    "強": {
+      active: "ずっと温めていたアイデアや提案を、今日こそ形にしてみてください。頭の中にあるものを紙に書き出すだけでも、不思議なほど物事が動き始めることがあります。誰かに相談するなら、今日がそのタイミングです。",
+      passive: "細かいミスや他人のやり方が気になっても、今日は口を出しすぎないように。正しいことでも、タイミングを外すと伝わりにくくなることがあります。"
+    },
+    "中": {
+      active: "今日は「完璧」より「完成」を目指してみてください。80点でも形にして誰かに見せると、思いがけない反応やヒントが返ってくるかもしれません。",
+      passive: "一度に複数のことを抱え込みすぎると、集中力が分散してしまいます。今日は一つひとつ丁寧に片づけることを意識してみてください。"
+    },
+    "弱": {
+      active: "大きな仕事より、ずっと後回しにしていた小さな作業を片づける日にしてみてください。デスクや手帳を整理するだけで、気持ちがすっきりして前に進めそうです。",
+      passive: "今日は新しいことを始めるより、今あるものを丁寧に守る日と思ってください。焦って動くと、後で修正が必要になる場面が増えそうです。"
+    }
+  },
+  "対人運": {
+    "強": {
+      active: "気になっていた人に、自分からメッセージを送ってみてください。「最近どうしてる？」という一言だけでも、久しぶりの会話が自然に始まりそうです。今日の言葉はいつもより温かく届く気がします。",
+      passive: "話しすぎに注意。今日のあなたは調子よく話せる分、相手が言いたいことを聞き流してしまうかもしれません。少し間を置いて、相手の言葉をじっくり受け取ってみてください。"
+    },
+    "中": {
+      active: "いつも一緒にいる人とは少し違う話題を選んでみてください。食事のこと、最近読んだもの、気になっているお店の話など、日常の小さな話題から意外な共通点が見つかりそうです。",
+      passive: "誰かの頼みをすべて引き受けようとしなくていいです。今日は「できることとできないこと」を自分の中でちゃんと分けておくと、後でほっとできそうです。"
+    },
+    "弱": {
+      active: "今日は自分から大きく動かなくていいので、目の前にいる人の話をいつもより少しだけ深く聞いてみてください。それだけで、相手はあなたのことを「大切にされた」と感じるかもしれません。",
+      passive: "人の多い場所や騒がしい環境は、今日は少し控えめに。一人でいる時間も大事にすることで、本来の自分のペースを保てそうです。"
+    }
+  },
+  "金運": {
+    "強": {
+      active: "ずっと迷っていた買い物があるなら、今日は思い切って決めてみるといい日です。衝動ではなく、よく考えた末の決断であれば後悔よりも満足感が残りそうです。良質なものへの投資が、長い目で見て自分を助けてくれることがあります。",
+      passive: "お金の流れが良い日ほど、出ていくスピードも上がりやすいもの。今日は「必要なもの」と「欲しいもの」を一度分けて考えてから財布を開いてみてください。"
+    },
+    "中": {
+      active: "今日は家計や支出を見直す良いタイミングです。使っていないサブスクや、もう必要のないものを整理すると、思っていた以上に余裕が生まれるかもしれません。",
+      passive: "セールや特売に飛びつくのは少し待って。今日の「お得」が本当に自分に必要かどうか、一晩おいてから判断する方が賢明です。"
+    },
+    "弱": {
+      active: "今日は大きな出費より、日常の中の小さな豊かさに目を向けてみてください。いつもより少しだけ良い食材を選んだり、好きなお菓子を一つ買ったりする程度の贅沢が、気持ちを満たしてくれそうです。",
+      passive: "今日は大きな金銭的判断を先送りする勇気も必要です。急いで決めなくていいことは、もう少し情報を集めてから動いた方が安心です。"
+    }
+  },
+  "恋愛運": {
+    "強": {
+      active: "気持ちを言葉にするなら、今日がそのときかもしれません。完璧な言葉を探すより、正直な気持ちをそのまま伝えることの方が、ずっと相手の心に届きます。勇気を出した分だけ、何かが変わりそうです。",
+      passive: "気持ちが高ぶっているときほど、少しだけ立ち止まってみてください。相手のペースや気持ちに耳を傾けると、二人の間にもっと深い信頼が生まれそうです。"
+    },
+    "中": {
+      active: "特別なことをしなくていいです。今日は一緒にいる時間をただ丁寧に過ごすことが、相手にとって何より嬉しいかもしれません。好きな食べ物を聞いてみたり、相手が話したいことに付き合ってみたりするだけで十分です。",
+      passive: "相手からの返事や反応を急かさないように。今日は少し待ってみると、向こうから自然に歩み寄ってくる場面が生まれそうです。"
+    },
+    "弱": {
+      active: "今日は誰かに向けるよりも、自分自身を大切にする日にしてみてください。好きな映画を見たり、気になっていたカフェに一人で行ってみたり。自分を満たすことが、自然と魅力につながっていきます。",
+      passive: "恋愛のことで頭がいっぱいになりそうなときは、少し距離を置いてみてください。今日は答えを出す日ではなく、気持ちを静かに確かめる日です。"
+    }
+  }
+};
+
+// 水色テーマ別の「今日訪れるかもしれないきっかけ」「大事な選択」（仮データ）
+const blueGuidance = {
+  "過去": { trigger: "懐かしい誰かから連絡が来るかもしれません。", choice: "昔の自分を否定せず、今に活かす道を選んでみてください。" },
+  "現在": { trigger: "目の前の小さな出来事に、大事なヒントが隠れています。", choice: "先延ばしにせず、今この瞬間の選択を大切にしてください。" },
+  "未来": { trigger: "ふと浮かんだ予定や誘いが、思わぬ転機になりそうです。", choice: "迷ったときは、より遠くの未来につながる方を選んでみてください。" },
+  "直感": { trigger: "理由はわからないけれど気になるものに出会うかもしれません。", choice: "頭で考えるより先に、心が動いた方を選んでみてください。" }
+};
+
+// 時間帯ごとの自然・生き物モチーフ（仮データ）
+// 朝:5-10 昼:10-16 夕:16-19 夜:19-5
+const timeOfDayMessages = {
+  "朝": [
+    "朝、小鳥の声がいつもより近くに聞こえたら、それは小さな後押しのサインです。",
+    "朝露が葉先で光る瞬間のように、今日のひらめきも一瞬だけ姿を見せるかもしれません。",
+    "朝の光に向かって伸びる植物のように、今日は自然と前を向きたくなりそうです。"
+  ],
+  "昼": [
+    "お昼どき、誰かと分け合った食べ物が、心をふっとゆるめてくれそうです。",
+    "蝶がひらりと視界をよぎったら、それは立ち止まって深呼吸する合図です。",
+    "太陽が一番高く昇るこの時間、あなたの集中力も同じように高まっていきそうです。"
+  ],
+  "夕": [
+    "夕暮れの空の色が変わる瞬間に、今日一日の出来事をそっと振り返ってみてください。",
+    "夕方、鳥たちが連れ立って帰っていく姿のように、誰かと一緒に過ごす時間が心地よく感じられそうです。",
+    "風が少しやわらぐ夕方は、張りつめていた気持ちもゆるめていい時間です。"
+  ],
+  "夜": [
+    "夜、月の満ち欠けにふと目を向けると、心の状態と重なる部分があるかもしれません。",
+    "静かな夜に虫の声が聞こえたら、それは今日のあなたへのささやかな子守唄です。",
+    "星がひとつ瞬くのを見つけたら、それは明日へのささやかな約束のサインです。"
+  ]
+};
+
+function getTimeOfDay() {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 10) return "朝";
+  if (h >= 10 && h < 16) return "昼";
+  if (h >= 16 && h < 19) return "夕";
+  return "夜";
+}
+
+// シェアカード用・短縮メッセージ（赤テーマ×水色テーマの組み合わせ）
+const shareMessages = {
+  "仕事運": {
+    "過去": "これまでの経験を活かしながら、新しい一歩を踏み出すと道が開けそうです。",
+    "現在": "今この瞬間の集中力を大切に。丁寧に取り組めば、確かな成果につながります。",
+    "未来": "少し先を見据えて動くと、今日の行動が大きな実りになりそうです。",
+    "直感": "迷ったら、最初に感じた方向を信じて。あなたの直感は今日正しく働いています。"
+  },
+  "対人運": {
+    "過去": "懐かしい縁が今日のあなたを助けてくれそう。大切にしてきた関係を思い出して。",
+    "現在": "目の前の人との会話を丁寧に。小さな気遣いが、大きな信頼に育っていきます。",
+    "未来": "今日の出会いや会話が、思わぬ形で未来につながっていくかもしれません。",
+    "直感": "「この人と話したい」と感じたら、その気持ちのまま声をかけてみてください。"
+  },
+  "金運": {
+    "過去": "過去の選択を振り返ると、今後のお金との向き合い方が見えてきそうです。",
+    "現在": "今の状況を丁寧に把握することが、豊かさへの第一歩になりそうです。",
+    "未来": "少し先の自分のために、今日の選択を大切にしてみてください。",
+    "直感": "「これだ」と感じたものへの投資は、今日は信頼してみていいかもしれません。"
+  },
+  "恋愛運": {
+    "過去": "大切な気持ちを思い出すと、今のあなたに必要なことが見えてきそうです。",
+    "現在": "今この瞬間の素直な気持ちを、大切にしてみてください。",
+    "未来": "今日の小さな行動が、未来の大切な場面への布石になっているかもしれません。",
+    "直感": "心がときめいたら、それは大事なサイン。理屈より感覚を信じてみて。"
+  }
+};
+
+// 励ましの言葉（ランダム）
+const encouragements = [
+  "あなたの今日は、きっと誰かにとっての光になっています。",
+  "迷うことも、立ち止まることも、前へ進む力になります。",
+  "小さな一歩が、いつか大きな景色を連れてきてくれます。",
+  "今日のあなたには、昨日より少し強くなった何かがあります。",
+  "自分を信じる気持ちが、一番の守り神になってくれます。",
+  "あなたがここにいることが、今日という日を特別にしています。",
+  "焦らなくていい。あなたのペースで進む道が、一番美しい。",
+  "今日という日は、もう二度と来ない贈り物です。",
+];
+
+// 曜日ごとのテーマと画像セット（仮データ）
+// 0:日 1:月 2:火 3:水 4:木 5:金 6:土
+const weekdayThemes = [
+  { name: "太陽", label: "輝き・活力",
+    images: [
+      { key: "sun_1", file: "sun_1.jpg", comment: "今日のあなたは、新しい一歩を踏み出す勢いに満ちています。" },
+      { key: "sun_2", file: "sun_2.jpg", comment: "今日のあなたは、自分の存在感を堂々と発揮できそうです。" },
+      { key: "sun_3", file: "sun_3.jpg", comment: "今日のあなたは、周囲を明るく照らす存在になれそうです。" }
+    ]
+  },
+  { name: "月", label: "感受性・内面",
+    images: [
+      { key: "mon_1", file: "monday_1.jpg", comment: "今日のあなたは、静かに自分の内側と向き合う時間が大切です。" },
+      { key: "mon_2", file: "monday_2.jpg", comment: "今日のあなたは、感情の揺れを大切にしてあげてください。" },
+      { key: "mon_3", file: "monday_3.jpg", comment: "今日のあなたは、直感的な気づきが多い一日になりそうです。" }
+    ]
+  },
+  { name: "炎", label: "情熱・行動力",
+    images: [
+      { key: "tue_1", file: "tue_1.jpg", comment: "今日のあなたは、迷うより先に動くことで道が開けそうです。" },
+      { key: "tue_2", file: "tue_2.jpg", comment: "今日のあなたは、まっすぐに目標へ向かう力があります。" },
+      { key: "tue_3", file: "tue_3.jpg", comment: "今日のあなたは、ちょっとした挑戦が良い刺激になりそうです。" }
+    ]
+  },
+  { name: "風", label: "コミュニケーション",
+    images: [
+      { key: "wed_1", file: "wed_1.jpg", comment: "今日のあなたは、誰かとの会話から新しいヒントを得られそうです。" },
+      { key: "wed_2", file: "wed_2.jpg", comment: "今日のあなたは、言葉にすることで気持ちが整理されそうです。" },
+      { key: "wed_3", file: "wed_3.jpg", comment: "今日のあなたは、軽やかなフットワークが運を引き寄せます。" }
+    ]
+  },
+  { name: "太陽の恵み", label: "楽観・幸運",
+    images: [
+      { key: "thu_1", file: "thu_1.jpg", comment: "今日のあなたは、これまでの努力が実を結びやすい日です。" },
+      { key: "thu_2", file: "thu_2.jpg", comment: "今日のあなたは、思わぬ幸運に恵まれるかもしれません。" },
+      { key: "thu_3", file: "thu_3.jpg", comment: "今日のあなたは、物事を大きく捉えると道が見えてきそうです。" }
+    ]
+  },
+  { name: "花", label: "美・愛",
+    images: [
+      { key: "fri_1", file: "fri_1.jpg", comment: "今日のあなたは、人との繋がりに愛おしさを感じやすい日です。" },
+      { key: "fri_2", file: "fri_2.jpg", comment: "今日のあなたは、自分や誰かを大切に思う気持ちが強まります。" },
+      { key: "fri_3", file: "fri_3.jpg", comment: "今日のあなたは、美しいものに触れると心が満たされそうです。" }
+    ]
+  },
+  { name: "石", label: "忍耐・堅実",
+    images: [
+      { key: "sat_1", file: "sat_1.jpg", comment: "今日のあなたは、地道な積み重ねが力になる一日です。" },
+      { key: "sat_2", file: "sat_2.jpg", comment: "今日のあなたは、じっくり腰を据えて取り組むと安心できそうです。" },
+      { key: "sat_3", file: "sat_3.jpg", comment: "今日のあなたは、揺るがない自分の軸を感じられそうです。" }
+    ]
+  }
+];
+
+function getTodayTheme() {
+  const dow = new Date().getDay(); // 0=日 ... 6=土
+  return weekdayThemes[dow];
+}
+
+// ---------- UI操作 ----------
+
+let selectedImage = null;
+let redValue = null;
+let blueValue = null;
+const todayTheme = getTodayTheme();
+
+document.getElementById("themeName").textContent = todayTheme.name + "（" + todayTheme.label + "）";
+
+const imgContainer = document.getElementById("imageChoices");
+todayTheme.images.forEach(img => {
+  const div = document.createElement("div");
+  div.className = "img-choice";
+  div.dataset.key = img.key;
+  const imgEl = document.createElement("img");
+  imgEl.src = img.file;
+  imgEl.alt = img.key;
+  imgEl.style.cssText = "width:100%; height:100%; object-fit:cover; border-radius:6px;";
+  div.appendChild(imgEl);
+  div.addEventListener("click", () => {
+    document.querySelectorAll(".img-choice").forEach(e => e.classList.remove("selected"));
+    div.classList.add("selected");
+    selectedImage = img.key;
+  });
+  imgContainer.appendChild(div);
+});
+
+document.getElementById("rollDiceBtn").addEventListener("click", () => {
+  const redEl = document.getElementById("redDice");
+  const blueEl = document.getElementById("blueDice");
+  const redNum = redEl.querySelector(".dice-num");
+  const blueNum = blueEl.querySelector(".dice-num");
+  const diceArea = document.getElementById("diceArea");
+
+  // Web Audio API セットアップ
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  const audioCtx = new AudioCtx();
+
+  // カタッという短い音を鳴らす関数
+  function playTick() {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type = "square";
+    osc.frequency.setValueAtTime(180 + Math.random() * 60, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + 0.06);
+  }
+
+  // コトンという止まる音を鳴らす関数
+  function playLand() {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(280, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + 0.2);
+  }
+
+  // 表示
+  diceArea.classList.remove("hidden");
+  redEl.classList.remove("landed");
+  blueEl.classList.remove("landed");
+  redEl.classList.add("rolling");
+  blueEl.classList.add("rolling");
+
+  // カタカタと数字を切り替える
+  const duration = 1200;
+  const interval = 80;
+  let elapsed = 0;
+
+  const timer = setInterval(() => {
+    redNum.textContent = Math.floor(Math.random() * 12) + 1;
+    blueNum.textContent = Math.floor(Math.random() * 12) + 1;
+    playTick();
+    elapsed += interval;
+
+    if (elapsed >= duration) {
+      clearInterval(timer);
+      redValue = Math.floor(Math.random() * 12) + 1;
+      blueValue = Math.floor(Math.random() * 12) + 1;
+      redNum.textContent = redValue;
+      blueNum.textContent = blueValue;
+      redEl.classList.remove("rolling");
+      blueEl.classList.remove("rolling");
+      redEl.classList.add("landed");
+      blueEl.classList.add("landed");
+      playLand();
+    }
+  }, interval);
+});
+
+document.getElementById("submitBtn").addEventListener("click", () => {
+  const y = parseInt(document.getElementById("birthYear").value);
+  const m = parseInt(document.getElementById("birthMonth").value);
+  const d = parseInt(document.getElementById("birthDay").value);
+  const bloodEl = document.querySelector('input[name="blood"]:checked');
+  const luckyNum = parseInt(document.getElementById("luckyNumber").value);
+
+  if (!y || !m || !d) { alert("生年月日を入力してください"); return; }
+  if (!bloodEl) { alert("血液型を選択してください"); return; }
+  if (!luckyNum || luckyNum < 1 || luckyNum > 12) { alert("好きな数字（1〜12）を入力してください"); return; }
+  if (!selectedImage) { alert("画像を1枚選んでください"); return; }
+  if (!redValue || !blueValue) { alert("サイコロを振ってください"); return; }
+  const selectedImageData = todayTheme.images.find(i => i.key === selectedImage);
+  const blood = bloodEl.value;
+  const zodiac = getZodiac(m, d);
+  const zodiacRanking = getTodayZodiacRanking();
+  const myRanking = zodiacRanking[zodiac];
+  const kin = calcKin(y, m, d);
+
+  // 太陽の紋章：KIN mod 20（0なら20）
+  let sealIdx = kin % 20;
+  if (sealIdx === 0) sealIdx = 20;
+  const sunSeal = sunSeals[sealIdx - 1];
+
+  // 銀河の音：KIN mod 13（0なら13）
+  let toneNum = kin % 13;
+  if (toneNum === 0) toneNum = 13;
+  const tone = galacticTones[toneNum - 1];
+
+  // ウェイブスペル：音1までさかのぼったKINの太陽の紋章
+  const kinAtTone1 = kin - (toneNum - 1);
+  let wsKin = ((kinAtTone1 - 1) % 260 + 260) % 260 + 1;
+  let wsIdx = wsKin % 20;
+  if (wsIdx === 0) wsIdx = 20;
+  const waveSpell = sunSeals[wsIdx - 1];
+  const lifePath = calcLifePathNumber(y, m, d);
+  const red = getRedResult(redValue);
+  const blue = getBlueResult(blueValue);
+  const keyword = blueKeywords[blue.theme];
+  const lifePathDesc = lifePathText[lifePath];
+  const luckyItems = redLuckyItems[red.theme];
+  const luckyItem = luckyItems[Math.floor(Math.random() * luckyItems.length)];
+  const guidance = blueGuidance[blue.theme];
+  const actionGuidance = redActionGuidance[red.theme][red.intensity];
+  const timeOfDay = getTimeOfDay();
+  const timeMessages = timeOfDayMessages[timeOfDay];
+  const timeMessage = timeMessages[Math.floor(Math.random() * timeMessages.length)];
+
+  // シェア用データ
+  const xAccount = document.getElementById("xAccount").value.trim();
+  const xAccountLabel = xAccount ? `${xAccount} さんの` : "あなたの";
+  const shareMsg = shareMessages[red.theme][blue.theme];
+  const encouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
+  const now = new Date();
+  const weekdays = ["日","月","火","水","木","金","土"];
+  const dateLabel = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,"0")}.${String(now.getDate()).padStart(2,"0")}（${weekdays[now.getDay()]}）${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+
+  const html = `
+    <div class="letter">
+      <h1>Sumikoより、あなたへ</h1>
+
+      <div class="score-board">
+        <p class="score-rank">今日の${zodiac}は <span class="big">${myRanking.rank}</span> 位 <span class="small-text">／12星座中</span></p>
+        <p class="score-points">運勢スコア：<span class="big">${myRanking.score}</span> / 100点</p>
+      </div>
+
+      <p>こんにちは。今日のあなたのために、星と数字とマヤの暦を読み解いてみました。少し長いお手紙になりますが、最後まで読んでいただけたら嬉しいです。</p>
+
+      <div class="section">
+        <h2>あなたという人について</h2>
+        <p>${zodiac}生まれで${blood}型のあなたは、${bloodTypeText[blood]}好きな数字「${luckyNum}」を選んだあなたは、きっとその数字に何か特別な響きを感じているのではないでしょうか。数字には、その人だけの意味が宿っていることがあります。</p>
+      </div>
+
+      <div class="section">
+        <h2>マヤの暦が語る、あなたの本質（KIN${kin}）</h2>
+        <p>あなたが生まれた日、宇宙には「${sunSeal}」のエネルギーが流れていました。これはあなたが表向きに発揮している、いわば顕在的な性質です。そしてその奥には「${waveSpell}」という、もう一つの顔が眠っています。これは普段あまり意識されない、潜在的な才能。誰かに指摘されてはじめて「そうかもしれない」と気づくような、隠れた一面かもしれません。</p>
+        <p>さらに、あなたには「音${toneNum}（${tone}）」というエネルギーの使い方の傾向も刻まれています。表の性質と、奥に眠る才能と、エネルギーの流し方。この3つが重なり合って、唯一無二のあなたという人をかたちづくっているのです。</p>
+      </div>
+
+      <div class="section">
+        <h2>数秘術が語る、あなたの人生のテーマ</h2>
+        <p>生年月日の数字をすべて足し合わせていくと、あなたのライフパスナンバーは「${lifePath}」になりました。${lifePathDesc}</p>
+        <p>これは今日だけの話ではなく、あなたがこれから歩んでいく人生全体に流れているテーマです。ふとした瞬間に、この数字の力を思い出してみてください。</p>
+      </div>
+
+      <div class="section">
+        <h2>今日選んでいただいた「${todayTheme.name}」について</h2>
+        <p>${selectedImageData.comment}</p>
+      </div>
+
+      <div class="section highlight">
+        <h2>今日、特に大切にしてほしいこと</h2>
+        <p>あなたの本質と、今日という日が重なり合うところに、「${red.theme}」が${red.intensity}く動く気配が見えています。そして「${blue.theme}」という視点が、今日のあなたにとって大きな鍵になりそうです。</p>
+        <p>${guidance.trigger}そのとき、${guidance.choice}</p>
+        <p>${luckyItem}</p>
+      </div>
+
+      <div class="section">
+        <h2>今日、積極的に動くといいこと</h2>
+        <p>${actionGuidance.active}</p>
+      </div>
+
+      <div class="section">
+        <h2>今日、あまり深追いせず静観したほうがいいこと</h2>
+        <p>${actionGuidance.passive}</p>
+      </div>
+
+      <div class="section">
+        <h2>今日のキーワード</h2>
+        <p class="keyword">${keyword.en} <span class="keyword-ja">（${keyword.ja}）</span></p>
+      </div>
+
+      <div class="section">
+        <h2>今日の${timeOfDay}に、そっと心にとめておいてほしいこと</h2>
+        <p>${timeMessage}</p>
+      </div>
+
+      <p class="closing">今日という日が、あなたにとって少しでも優しいものになりますように。<br>また明日、お会いしましょう。<br><span class="signature">— Sumiko</span></p>
+    </div>
+
+    <div id="shareCard">
+      <p class="share-title">${xAccountLabel}今日の占い結果</p>
+      <div class="share-stats">
+        <span>${zodiac} ${myRanking.rank}位／12星座</span>
+        <span>運勢スコア ${myRanking.score}点</span>
+        <span>KIN${kin}・${sunSeal}</span>
+      </div>
+      <p class="share-keyword">${keyword.en}（${keyword.ja}）</p>
+      <p class="share-msg">${shareMsg}</p>
+      <p class="share-encouragement">✨ ${encouragement}</p>
+      <p class="share-date">占い実施日時：${dateLabel}</p>
+      <p class="share-footer">四つの星命秘録 by Sumiko Ellington</p>
+    </div>
+
+    <p class="share-guide">
+      📌 <strong>Xでシェアする方法（パソコンの場合）</strong><br>
+      ①「画像を保存する」をクリックすると、占い結果カードの画像が保存されます。<br>
+      ②「Xでシェアする」をクリックすると、Xの投稿画面が開き、結果のテキストが自動で入力されます。<br>
+      ③ 投稿画面で保存した画像を添付してポストしてください。<br>
+      <span style="color:#94a3b8; font-size:0.9em;">※ スマホからのシェアは後日対応予定です。</span>
+    </p>
+    <div style="margin-top:8px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button id="saveCardBtn">📷 画像を保存する</button>
+      <button id="tweetBtn">𝕏 Xでシェアする</button>
+      <button id="retryBtn">🔄 最初からやり直す</button>
+    </div>
+  `;
+
+  document.getElementById("resultArea").innerHTML = html;
+  document.getElementById("resultArea").classList.remove("hidden");
+  document.getElementById("formArea").classList.add("hidden");
+
+  // やり直すボタン
+  document.getElementById("retryBtn").addEventListener("click", () => {
+    document.getElementById("resultArea").classList.add("hidden");
+    document.getElementById("formArea").classList.remove("hidden");
+    document.querySelectorAll(".img-choice").forEach(e => e.classList.remove("selected"));
+    selectedImage = null; redValue = null; blueValue = null;
+    document.getElementById("diceArea").classList.add("hidden");
+    document.getElementById("redDice").textContent = "?";
+    document.getElementById("blueDice").textContent = "?";
+  });
+
+  // Xシェアボタン（短縮テキスト）
+  document.getElementById("tweetBtn").addEventListener("click", () => {
+    const tweetText = `今日の占い結果🔮\n${xAccountLabel}\n${zodiac} ${myRanking.rank}位／12星座　運勢スコア${myRanking.score}点\nKIN${kin}・${sunSeal}\nキーワード：${keyword.en}（${keyword.ja}）\n${shareMsg}\n#Sumiko占い`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, "_blank");
+  });
+
+  // 画像保存ボタン（Canvas直接描画方式）
+  document.getElementById("saveCardBtn").addEventListener("click", () => {
+    try {
+      const canvas = document.createElement("canvas");
+      const W = 600, H = 420;
+      canvas.width = W * 2;
+      canvas.height = H * 2;
+      const ctx = canvas.getContext("2d");
+      ctx.scale(2, 2);
+
+      // 背景グラデーション
+      const grad = ctx.createLinearGradient(0, 0, W, H);
+      grad.addColorStop(0, "#1a1a2e");
+      grad.addColorStop(1, "#2d1b4e");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+
+      // タイトル
+      ctx.fillStyle = "#ffd27f";
+      ctx.font = "bold 18px sans-serif";
+      ctx.fillText(`${xAccountLabel}今日の占い結果`, 24, 44);
+
+      // 区切り線
+      ctx.strokeStyle = "rgba(255,255,255,0.15)";
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(24, 56); ctx.lineTo(W - 24, 56); ctx.stroke();
+
+      // 星座・順位・スコア・KIN
+      ctx.fillStyle = "#cbd5e1";
+      ctx.font = "13px sans-serif";
+      ctx.fillText(`${zodiac}　${myRanking.rank}位 / 12星座　運勢スコア ${myRanking.score}点　KIN${kin}・${sunSeal}`, 24, 80);
+
+      // キーワード
+      ctx.fillStyle = "#a78bfa";
+      ctx.font = "bold 28px sans-serif";
+      ctx.fillText(`${keyword.en}`, 24, 124);
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "14px sans-serif";
+      ctx.fillText(`（${keyword.ja}）`, 24, 146);
+
+      // 区切り線
+      ctx.strokeStyle = "rgba(255,255,255,0.1)";
+      ctx.beginPath(); ctx.moveTo(24, 160); ctx.lineTo(W - 24, 160); ctx.stroke();
+
+      // メッセージ（折り返し処理）
+      ctx.fillStyle = "#e2e8f0";
+      ctx.font = "13px sans-serif";
+      const msgLines = wrapText(ctx, shareMsg, W - 48);
+      msgLines.forEach((line, i) => ctx.fillText(line, 24, 182 + i * 20));
+
+      // 励ましの言葉
+      const msgH = 182 + msgLines.length * 20 + 12;
+      ctx.fillStyle = "#fbbf24";
+      const encLines = wrapText(ctx, `✨ ${encouragement}`, W - 48);
+      encLines.forEach((line, i) => ctx.fillText(line, 24, msgH + i * 20));
+
+      // 日時とフッター
+      ctx.fillStyle = "#64748b";
+      ctx.font = "11px sans-serif";
+      ctx.fillText(`占い実施日時：${dateLabel}`, 24, H - 36);
+      ctx.fillText("四つの星命秘録 by Sumiko Ellington", 24, H - 18);
+
+      // ダウンロード
+      const dataUrl = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.download = `sumiko_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch(e) {
+      alert("画像の生成に失敗しました: " + e.message);
+    }
+  });
+
+  // テキスト折り返し関数
+  function wrapText(ctx, text, maxWidth) {
+    const lines = [];
+    let line = "";
+    for (const ch of text) {
+      const test = line + ch;
+      if (ctx.measureText(test).width > maxWidth && line !== "") {
+        lines.push(line);
+        line = ch;
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+});
+</script>
+
+</body>
+</html>
