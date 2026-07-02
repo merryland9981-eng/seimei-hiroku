@@ -767,115 +767,134 @@ document.getElementById("submitBtn").addEventListener("click", () => {
       <p class="share-footer">四つの星命秘録 by Sumiko Ellington</p>
     </div>
 
-    <p class="share-guide">
-      📌 <strong>Xでシェアする方法（パソコンの場合）</strong><br>
-      ①「画像を保存する」をクリックすると、占い結果カードの画像が保存されます。<br>
-      ②「Xでシェアする」をクリックすると、Xの投稿画面が開き、結果のテキストが自動で入力されます。<br>
-      ③ 投稿画面で保存した画像を添付してポストしてください。<br>
-      <span style="color:#94a3b8; font-size:0.9em;">※ スマホからのシェアは後日対応予定です。</span>
-    </p>
-    <div style="margin-top:8px; display:flex; gap:10px; flex-wrap:wrap;">
-      <button id="saveCardBtn">📷 画像を保存する</button>
-      <button id="tweetBtn">𝕏 Xでシェアする</button>
-      <button id="retryBtn">🔄 最初からやり直す</button>
-    </div>
+    <p class="share-guide" id="shareGuide"></p>
+    <div style="margin-top:8px; display:flex; gap:10px; flex-wrap:wrap;" id="shareButtons"></div>
   `;
 
   document.getElementById("resultArea").innerHTML = html;
   document.getElementById("resultArea").classList.remove("hidden");
   document.getElementById("formArea").classList.add("hidden");
 
-  // やり直すボタン
+  // PC/スマホ判定
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const canShare = navigator.share !== undefined;
+  const guideEl = document.getElementById("shareGuide");
+  const btnsEl = document.getElementById("shareButtons");
+
+  // Canvas画像生成関数（PC・スマホ共通）
+  function generateCanvasImage() {
+    const canvas = document.createElement("canvas");
+    const W = 600, H = 420;
+    canvas.width = W * 2;
+    canvas.height = H * 2;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(2, 2);
+    const grad = ctx.createLinearGradient(0, 0, W, H);
+    grad.addColorStop(0, "#1a1a2e");
+    grad.addColorStop(1, "#2d1b4e");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#ffd27f";
+    ctx.font = "bold 18px sans-serif";
+    ctx.fillText(`${xAccountLabel}今日の占い結果`, 24, 44);
+    ctx.strokeStyle = "rgba(255,255,255,0.15)";
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(24, 56); ctx.lineTo(W - 24, 56); ctx.stroke();
+    ctx.fillStyle = "#cbd5e1";
+    ctx.font = "13px sans-serif";
+    ctx.fillText(`${zodiac}　${myRanking.rank}位 / 12星座　運勢スコア ${myRanking.score}点　KIN${kin}・${sunSeal}`, 24, 80);
+    ctx.fillStyle = "#a78bfa";
+    ctx.font = "bold 28px sans-serif";
+    ctx.fillText(`${keyword.en}`, 24, 124);
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "14px sans-serif";
+    ctx.fillText(`（${keyword.ja}）`, 24, 146);
+    ctx.strokeStyle = "rgba(255,255,255,0.1)";
+    ctx.beginPath(); ctx.moveTo(24, 160); ctx.lineTo(W - 24, 160); ctx.stroke();
+    ctx.fillStyle = "#e2e8f0";
+    ctx.font = "13px sans-serif";
+    const msgLines = wrapText(ctx, shareMsg, W - 48);
+    msgLines.forEach((line, i) => ctx.fillText(line, 24, 182 + i * 20));
+    const msgH = 182 + msgLines.length * 20 + 12;
+    ctx.fillStyle = "#fbbf24";
+    const encLines = wrapText(ctx, `✨ ${encouragement}`, W - 48);
+    encLines.forEach((line, i) => ctx.fillText(line, 24, msgH + i * 20));
+    ctx.fillStyle = "#64748b";
+    ctx.font = "11px sans-serif";
+    ctx.fillText(`占い実施日時：${dateLabel}`, 24, H - 36);
+    ctx.fillText("四つの星命秘録 by Sumiko Ellington", 24, H - 18);
+    return canvas;
+  }
+
+  const tweetText = `今日の占い結果🔮\n${xAccountLabel}\n${zodiac} ${myRanking.rank}位／12星座　運勢スコア${myRanking.score}点\nKIN${kin}・${sunSeal}\nキーワード：${keyword.en}（${keyword.ja}）\n${shareMsg}\n#Sumiko占い`;
+
+  if (isMobile && canShare) {
+    // スマホ：Web Share APIボタン1つ
+    guideEl.innerHTML = `📌 <strong>結果をシェアする</strong><br>「シェアする」ボタンをタップすると、XやLINEなどのアプリから結果画像を送れます。`;
+    const shareBtn = document.createElement("button");
+    shareBtn.textContent = "🔗 シェアする";
+    shareBtn.addEventListener("click", async () => {
+      try {
+        const canvas = generateCanvasImage();
+        canvas.toBlob(async (blob) => {
+          const file = new File([blob], `sumiko_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}.png`, { type: "image/png" });
+          await navigator.share({
+            title: "四つの星命秘録",
+            text: tweetText,
+            files: [file]
+          });
+        }, "image/png");
+      } catch(e) {
+        if (e.name !== "AbortError") alert("シェアに失敗しました: " + e.message);
+      }
+    });
+    const retryBtn = document.createElement("button");
+    retryBtn.textContent = "🔄 最初からやり直す";
+    retryBtn.id = "retryBtn";
+    btnsEl.appendChild(shareBtn);
+    btnsEl.appendChild(retryBtn);
+  } else {
+    // PC：従来の3ボタン
+    guideEl.innerHTML = `📌 <strong>Xでシェアする方法（パソコンの場合）</strong><br>①「画像を保存する」をクリックすると、占い結果カードの画像が保存されます。<br>②「Xでシェアする」をクリックすると、Xの投稿画面が開き、結果のテキストが自動で入力されます。<br>③ 投稿画面で保存した画像を添付してポストしてください。`;
+    btnsEl.innerHTML = `
+      <button id="saveCardBtn">📷 画像を保存する</button>
+      <button id="tweetBtn">𝕏 Xでシェアする</button>
+      <button id="retryBtn">🔄 最初からやり直す</button>
+    `;
+  }
+
+  // やり直すボタン（PC・スマホ共通）
   document.getElementById("retryBtn").addEventListener("click", () => {
     document.getElementById("resultArea").classList.add("hidden");
     document.getElementById("formArea").classList.remove("hidden");
     document.querySelectorAll(".img-choice").forEach(e => e.classList.remove("selected"));
     selectedImage = null; redValue = null; blueValue = null;
     document.getElementById("diceArea").classList.add("hidden");
-    document.getElementById("redDice").textContent = "?";
-    document.getElementById("blueDice").textContent = "?";
+    document.getElementById("redDice").querySelector(".dice-num").textContent = "?";
+    document.getElementById("blueDice").querySelector(".dice-num").textContent = "?";
   });
 
-  // Xシェアボタン（短縮テキスト）
-  document.getElementById("tweetBtn").addEventListener("click", () => {
-    const tweetText = `今日の占い結果🔮\n${xAccountLabel}\n${zodiac} ${myRanking.rank}位／12星座　運勢スコア${myRanking.score}点\nKIN${kin}・${sunSeal}\nキーワード：${keyword.en}（${keyword.ja}）\n${shareMsg}\n#Sumiko占い`;
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, "_blank");
-  });
+  // PC用ボタン
+  if (!isMobile || !canShare) {
+    document.getElementById("tweetBtn").addEventListener("click", () => {
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, "_blank");
+    });
 
-  // 画像保存ボタン（Canvas直接描画方式）
-  document.getElementById("saveCardBtn").addEventListener("click", () => {
-    try {
-      const canvas = document.createElement("canvas");
-      const W = 600, H = 420;
-      canvas.width = W * 2;
-      canvas.height = H * 2;
-      const ctx = canvas.getContext("2d");
-      ctx.scale(2, 2);
-
-      // 背景グラデーション
-      const grad = ctx.createLinearGradient(0, 0, W, H);
-      grad.addColorStop(0, "#1a1a2e");
-      grad.addColorStop(1, "#2d1b4e");
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, W, H);
-
-      // タイトル
-      ctx.fillStyle = "#ffd27f";
-      ctx.font = "bold 18px sans-serif";
-      ctx.fillText(`${xAccountLabel}今日の占い結果`, 24, 44);
-
-      // 区切り線
-      ctx.strokeStyle = "rgba(255,255,255,0.15)";
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(24, 56); ctx.lineTo(W - 24, 56); ctx.stroke();
-
-      // 星座・順位・スコア・KIN
-      ctx.fillStyle = "#cbd5e1";
-      ctx.font = "13px sans-serif";
-      ctx.fillText(`${zodiac}　${myRanking.rank}位 / 12星座　運勢スコア ${myRanking.score}点　KIN${kin}・${sunSeal}`, 24, 80);
-
-      // キーワード
-      ctx.fillStyle = "#a78bfa";
-      ctx.font = "bold 28px sans-serif";
-      ctx.fillText(`${keyword.en}`, 24, 124);
-      ctx.fillStyle = "#94a3b8";
-      ctx.font = "14px sans-serif";
-      ctx.fillText(`（${keyword.ja}）`, 24, 146);
-
-      // 区切り線
-      ctx.strokeStyle = "rgba(255,255,255,0.1)";
-      ctx.beginPath(); ctx.moveTo(24, 160); ctx.lineTo(W - 24, 160); ctx.stroke();
-
-      // メッセージ（折り返し処理）
-      ctx.fillStyle = "#e2e8f0";
-      ctx.font = "13px sans-serif";
-      const msgLines = wrapText(ctx, shareMsg, W - 48);
-      msgLines.forEach((line, i) => ctx.fillText(line, 24, 182 + i * 20));
-
-      // 励ましの言葉
-      const msgH = 182 + msgLines.length * 20 + 12;
-      ctx.fillStyle = "#fbbf24";
-      const encLines = wrapText(ctx, `✨ ${encouragement}`, W - 48);
-      encLines.forEach((line, i) => ctx.fillText(line, 24, msgH + i * 20));
-
-      // 日時とフッター
-      ctx.fillStyle = "#64748b";
-      ctx.font = "11px sans-serif";
-      ctx.fillText(`占い実施日時：${dateLabel}`, 24, H - 36);
-      ctx.fillText("四つの星命秘録 by Sumiko Ellington", 24, H - 18);
-
-      // ダウンロード
-      const dataUrl = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      link.download = `sumiko_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}.png`;
-      link.href = dataUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch(e) {
-      alert("画像の生成に失敗しました: " + e.message);
-    }
-  });
+    document.getElementById("saveCardBtn").addEventListener("click", () => {
+      try {
+        const canvas = generateCanvasImage();
+        const dataUrl = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.download = `sumiko_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}.png`;
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch(e) {
+        alert("画像の生成に失敗しました: " + e.message);
+      }
+    });
+  }
 
   // テキスト折り返し関数
   function wrapText(ctx, text, maxWidth) {
