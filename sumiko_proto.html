@@ -830,7 +830,7 @@ document.getElementById("submitBtn").addEventListener("click", () => {
 
   if (canShare) {
     // スマホ：Web Share APIボタン1つ
-    guideEl.innerHTML = `📌 <strong>結果をシェアする</strong><br>「シェアする」ボタンをタップすると、XやLINEなどのアプリから結果画像を送れます。`;
+    guideEl.innerHTML = `📌 「シェアする」をタップして、ぜひ結果をシェアしてみてください。`;
     const shareBtn = document.createElement("button");
     shareBtn.textContent = "🔗 シェアする";
     shareBtn.addEventListener("click", async () => {
