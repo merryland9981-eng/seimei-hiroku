@@ -775,8 +775,8 @@ document.getElementById("submitBtn").addEventListener("click", () => {
   document.getElementById("resultArea").classList.remove("hidden");
   document.getElementById("formArea").classList.add("hidden");
 
-  // PC/スマホ判定
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  // PC/スマホ判定（画面幅でも判定）
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
   const canShare = navigator.share !== undefined;
   const guideEl = document.getElementById("shareGuide");
   const btnsEl = document.getElementById("shareButtons");
