@@ -807,17 +807,17 @@ document.getElementById("submitBtn").addEventListener("click", () => {
 
     // 星座・順位・スコア
     ctx.fillStyle = "#cbd5e1";
-    ctx.font = "13px sans-serif";
+    ctx.font = "15px sans-serif";
     ctx.fillText(`${zodiac}　${myRanking.rank}位 / 12星座　運勢スコア ${myRanking.score}点`, 24, 82);
-    ctx.fillText(`KIN${kin}・${sunSeal}`, 24, 102);
+    ctx.fillText(`KIN${kin}・${sunSeal}`, 24, 104);
 
     // キーワード
     ctx.fillStyle = "#a78bfa";
     ctx.font = "bold 32px sans-serif";
-    ctx.fillText(`${keyword.en}`, 24, 148);
+    ctx.fillText(`${keyword.en}`, 24, 150);
     ctx.fillStyle = "#94a3b8";
     ctx.font = "15px sans-serif";
-    ctx.fillText(`（${keyword.ja}）`, 24, 172);
+    ctx.fillText(`（${keyword.ja}）`, 24, 174);
 
     // 区切り線
     ctx.strokeStyle = "rgba(255,255,255,0.1)";
@@ -825,21 +825,22 @@ document.getElementById("submitBtn").addEventListener("click", () => {
 
     // メッセージ
     ctx.fillStyle = "#e2e8f0";
-    ctx.font = "13px sans-serif";
+    ctx.font = "15px sans-serif";
     const msgLines = wrapText(ctx, shareMsg, W - 48);
-    msgLines.forEach((line, i) => ctx.fillText(line, 24, 208 + i * 22));
+    msgLines.forEach((line, i) => ctx.fillText(line, 24, 208 + i * 24));
 
     // 励ましの言葉
-    const msgH = 208 + msgLines.length * 22 + 14;
+    const msgH = 208 + msgLines.length * 24 + 14;
     ctx.fillStyle = "#fbbf24";
+    ctx.font = "15px sans-serif";
     const encLines = wrapText(ctx, `✨ ${encouragement}`, W - 48);
-    encLines.forEach((line, i) => ctx.fillText(line, 24, msgH + i * 22));
+    encLines.forEach((line, i) => ctx.fillText(line, 24, msgH + i * 24));
 
     // 日時とフッター
     ctx.fillStyle = "#64748b";
-    ctx.font = "11px sans-serif";
+    ctx.font = "13px sans-serif";
     ctx.fillText(`占い実施日時：${dateLabel}`, 24, H - 36);
-    ctx.fillText("四つの星命秘録 by Sumiko Ellington", 24, H - 18);
+    ctx.fillText("四つの星命秘録 by Sumiko Ellington", 24, H - 16);
     return canvas;
   }
 
