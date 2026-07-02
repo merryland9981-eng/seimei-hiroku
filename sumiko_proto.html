@@ -775,9 +775,9 @@ document.getElementById("submitBtn").addEventListener("click", () => {
   document.getElementById("resultArea").classList.remove("hidden");
   document.getElementById("formArea").classList.add("hidden");
 
-  // PC/スマホ判定（画面幅でも判定）
+  // Web Share API対応チェック
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
-  const canShare = navigator.share !== undefined;
+  const canShare = typeof navigator.share === "function";
   const guideEl = document.getElementById("shareGuide");
   const btnsEl = document.getElementById("shareButtons");
 
@@ -828,7 +828,7 @@ document.getElementById("submitBtn").addEventListener("click", () => {
 
   const tweetText = `今日の占い結果🔮\n${xAccountLabel}\n${zodiac} ${myRanking.rank}位／12星座　運勢スコア${myRanking.score}点\nKIN${kin}・${sunSeal}\nキーワード：${keyword.en}（${keyword.ja}）\n${shareMsg}\n#Sumiko占い`;
 
-  if (isMobile && canShare) {
+  if (canShare) {
     // スマホ：Web Share APIボタン1つ
     guideEl.innerHTML = `📌 <strong>結果をシェアする</strong><br>「シェアする」ボタンをタップすると、XやLINEなどのアプリから結果画像を送れます。`;
     const shareBtn = document.createElement("button");
@@ -875,7 +875,7 @@ document.getElementById("submitBtn").addEventListener("click", () => {
   });
 
   // PC用ボタン
-  if (!isMobile || !canShare) {
+  if (!canShare) {
     document.getElementById("tweetBtn").addEventListener("click", () => {
       window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, "_blank");
     });
