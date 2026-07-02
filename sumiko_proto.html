@@ -784,7 +784,7 @@ document.getElementById("submitBtn").addEventListener("click", () => {
   // Canvas画像生成関数（PC・スマホ共通）
   function generateCanvasImage() {
     const canvas = document.createElement("canvas");
-    const W = 600, H = 420;
+    const W = 500, H = 500;
     canvas.width = W * 2;
     canvas.height = H * 2;
     const ctx = canvas.getContext("2d");
@@ -794,31 +794,48 @@ document.getElementById("submitBtn").addEventListener("click", () => {
     grad.addColorStop(1, "#2d1b4e");
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
+
+    // タイトル
     ctx.fillStyle = "#ffd27f";
     ctx.font = "bold 18px sans-serif";
     ctx.fillText(`${xAccountLabel}今日の占い結果`, 24, 44);
+
+    // 区切り線
     ctx.strokeStyle = "rgba(255,255,255,0.15)";
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(24, 56); ctx.lineTo(W - 24, 56); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(24, 58); ctx.lineTo(W - 24, 58); ctx.stroke();
+
+    // 星座・順位・スコア
     ctx.fillStyle = "#cbd5e1";
     ctx.font = "13px sans-serif";
-    ctx.fillText(`${zodiac}　${myRanking.rank}位 / 12星座　運勢スコア ${myRanking.score}点　KIN${kin}・${sunSeal}`, 24, 80);
+    ctx.fillText(`${zodiac}　${myRanking.rank}位 / 12星座　運勢スコア ${myRanking.score}点`, 24, 82);
+    ctx.fillText(`KIN${kin}・${sunSeal}`, 24, 102);
+
+    // キーワード
     ctx.fillStyle = "#a78bfa";
-    ctx.font = "bold 28px sans-serif";
-    ctx.fillText(`${keyword.en}`, 24, 124);
+    ctx.font = "bold 32px sans-serif";
+    ctx.fillText(`${keyword.en}`, 24, 148);
     ctx.fillStyle = "#94a3b8";
-    ctx.font = "14px sans-serif";
-    ctx.fillText(`（${keyword.ja}）`, 24, 146);
+    ctx.font = "15px sans-serif";
+    ctx.fillText(`（${keyword.ja}）`, 24, 172);
+
+    // 区切り線
     ctx.strokeStyle = "rgba(255,255,255,0.1)";
-    ctx.beginPath(); ctx.moveTo(24, 160); ctx.lineTo(W - 24, 160); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(24, 186); ctx.lineTo(W - 24, 186); ctx.stroke();
+
+    // メッセージ
     ctx.fillStyle = "#e2e8f0";
     ctx.font = "13px sans-serif";
     const msgLines = wrapText(ctx, shareMsg, W - 48);
-    msgLines.forEach((line, i) => ctx.fillText(line, 24, 182 + i * 20));
-    const msgH = 182 + msgLines.length * 20 + 12;
+    msgLines.forEach((line, i) => ctx.fillText(line, 24, 208 + i * 22));
+
+    // 励ましの言葉
+    const msgH = 208 + msgLines.length * 22 + 14;
     ctx.fillStyle = "#fbbf24";
     const encLines = wrapText(ctx, `✨ ${encouragement}`, W - 48);
-    encLines.forEach((line, i) => ctx.fillText(line, 24, msgH + i * 20));
+    encLines.forEach((line, i) => ctx.fillText(line, 24, msgH + i * 22));
+
+    // 日時とフッター
     ctx.fillStyle = "#64748b";
     ctx.font = "11px sans-serif";
     ctx.fillText(`占い実施日時：${dateLabel}`, 24, H - 36);
