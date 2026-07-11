@@ -281,6 +281,8 @@ function getZodiac(m, d) {
 // 赤サイコロ：1-3仕事運 4-6対人運 7-9金運 10-12恋愛運（各3段階強度）
 const redThemes = ["仕事運","対人運","金運","恋愛運"];
 const intensityLabels = ["弱","中","強"];
+// 文章中で「〜く動く」として使うための副詞形（「中」はイ形容詞ではないため個別対応）
+const intensityAdverbs = { "弱": "弱く", "中": "程よく", "強": "強く" };
 function getRedResult(n) {
   const idx = Math.floor((n - 1) / 3); // 0-3
   const intensity = (n - 1) % 3; // 0-2
@@ -725,7 +727,7 @@ document.getElementById("submitBtn").addEventListener("click", () => {
 
       <div class="section highlight">
         <h2>今日、特に大切にしてほしいこと</h2>
-        <p>あなたの本質と、今日という日が重なり合うところに、「${red.theme}」が${red.intensity}く動く気配が見えています。そして「${blue.theme}」という視点が、今日のあなたにとって大きな鍵になりそうです。</p>
+        <p>あなたの本質と、今日という日が重なり合うところに、「${red.theme}」が${intensityAdverbs[red.intensity]}動く気配が見えています。そして「${blue.theme}」という視点が、今日のあなたにとって大きな鍵になりそうです。</p>
         <p>${guidance.trigger}そのとき、${guidance.choice}</p>
         <p>${luckyItem}</p>
       </div>
