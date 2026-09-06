@@ -75,6 +75,32 @@
   .share-date { font-size: 0.75em; color: #94a3b8; margin: 10px 0 4px; }
   .share-footer { font-size: 0.75em; color: #64748b; margin: 0; }
   .share-guide { font-size: 0.85em; color: #94a3b8; background: #1a1a2e; border-left: 3px solid #a78bfa; padding: 8px 12px; border-radius: 4px; margin-top: 16px; line-height: 1.6; }
+
+  /* ===== タロットカード ===== */
+  .tarot-sub { font-size: 0.85em; color: #94a3b8; margin: 0 0 14px; }
+  .tarot-zone { display: flex; justify-content: center; margin-bottom: 14px; }
+  .tarot-card-outer { position: relative; width: 180px; height: 300px; perspective: 1200px; }
+  .tarot-card { position: absolute; inset: 0; border-radius: 12px; transform-style: preserve-3d; transition: transform 1.1s cubic-bezier(.22,.9,.28,1); }
+  .tarot-card.flipped { transform: rotateY(180deg); }
+  .tarot-face { position: absolute; inset: 0; border-radius: 12px; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #3a3a5c; box-shadow: 0 12px 28px rgba(0,0,0,0.5); overflow: hidden; }
+  .tarot-back { background: repeating-linear-gradient(45deg, rgba(255,210,127,0.06) 0 2px, transparent 2px 20px), repeating-linear-gradient(-45deg, rgba(255,210,127,0.06) 0 2px, transparent 2px 20px), linear-gradient(160deg, #2d1b4e, #1a1a2e 70%); }
+  .tarot-back-emblem { font-size: 34px; color: #ffd27f; opacity: 0.85; }
+  .tarot-back-label { position: absolute; bottom: 16px; font-size: 10px; letter-spacing: 0.3em; color: #ffd27f; opacity: 0.55; }
+  .tarot-countdown { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 5; background: rgba(15,15,26,0.4); border-radius: 12px; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; text-align: center; }
+  .tarot-countdown.active { opacity: 1; }
+  .tarot-countdown-num { font-size: 48px; color: #ffd27f; text-shadow: 0 0 18px rgba(255,210,127,0.55); }
+  .tarot-ready-word { font-weight: bold; font-size: 20px; line-height: 1.4; letter-spacing: 0.08em; color: #ff9ec4; text-shadow: 0 0 20px rgba(255,158,196,0.7); animation: tarotPulse 1.3s ease-in-out infinite; }
+  @keyframes tarotPulse { 0%,100% { opacity: 0.8; transform: scale(1); } 50% { opacity: 1; transform: scale(1.06); } }
+  .tarot-front { background: linear-gradient(180deg, #1a1a2e, #2d1b4e); transform: rotateY(180deg); padding: 0; }
+  .tarot-art-wrap { width: 100%; height: 205px; overflow: hidden; background: #0f0f1a; }
+  .tarot-art-wrap img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .tarot-art-wrap.reversed img { transform: rotate(180deg); }
+  .tarot-info { padding: 10px 12px 14px; text-align: center; }
+  .tarot-name-jp { font-weight: bold; font-size: 16px; margin-bottom: 1px; color: #e2e8f0; }
+  .tarot-name-en { font-size: 9px; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 8px; }
+  .tarot-orient { display: inline-block; font-size: 10px; letter-spacing: 0.06em; padding: 2px 10px; border-radius: 999px; border: 1px solid #ffd27f; color: #ffd27f; }
+  .tarot-orient.reversed { border-color: #ff9ec4; color: #ff9ec4; }
+  .tarot-status { text-align: center; font-size: 0.85em; color: #a78bfa; min-height: 18px; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -131,6 +157,38 @@
       </div>
     </div>
   </div>
+
+  <fieldset>
+    <legend>🔮 今日のタロットカード</legend>
+    <p class="tarot-sub">タップして、今日のカードを引いてください</p>
+    <div class="tarot-zone">
+      <div class="tarot-card-outer" id="tarotCardOuter">
+        <div class="tarot-card" id="tarotCard">
+          <div class="tarot-face tarot-back">
+            <div class="tarot-back-emblem">✦</div>
+            <div class="tarot-back-label">S U M I K O</div>
+          </div>
+          <div class="tarot-face tarot-front">
+            <div class="tarot-art-wrap" id="tarotArtWrap">
+              <img id="tarotArtImg" src="" alt="">
+            </div>
+            <div class="tarot-info">
+              <div class="tarot-name-jp" id="tarotNameJp"></div>
+              <div class="tarot-name-en" id="tarotNameEn"></div>
+              <div class="tarot-orient" id="tarotOrient"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tarot-countdown" id="tarotCountdown">
+          <div class="tarot-countdown-num" id="tarotCountdownNum">5</div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;">
+      <button id="tarotDrawBtn">タップして始める</button>
+    </div>
+    <p class="tarot-status" id="tarotStatus"></p>
+  </fieldset>
 
   <br>
   <button id="submitBtn">占い結果を見る</button>
@@ -279,6 +337,7 @@ function getZodiac(m, d) {
 
 // 赤サイコロ：1-3仕事運 4-6対人運 7-9金運 10-12恋愛運（各3段階強度）
 const redThemes = ["仕事運","対人運","金運","恋愛運"];
+const redThemeEmoji = { "仕事運": "💼", "対人運": "🤝", "金運": "💰", "恋愛運": "💕" };
 const intensityLabels = ["弱","中","強"];
 function getRedResult(n) {
   const idx = Math.floor((n - 1) / 3); // 0-3
@@ -527,10 +586,54 @@ const weekdayThemes = [
   }
 ];
 
+// 太陽の紋章（20種類）の短い意味（sunSealsと同じ並び順）
+const sunSealMeanings = [
+  "力強く生み出す力","風のように伝える力","静けさに満ちる直感","気づきから芽吹く力",
+  "生命力と本能の力","手放し、橋渡す力","癒し、形にする力","輝きと調和の力",
+  "満ち欠けを重ねる力","変わらず寄り添う力","遊び心と機知の力","自由に選び取る力",
+  "未知を歩む探求心","惹きつけ、魅せる力","高い視点で見渡す力","知性で切り拓く力",
+  "共鳴し、響き合う力","映し出し、正す力","嵐のように変える力","悟りに満ちる輝き"
+];
+
+// 銀河の音（13種類）の短い意味（galacticTonesと同じ並び順）
+const toneMeanings = [
+  "目的に向かう力","困難を越えていく力","誰かのために尽くす力","自分らしさを形にする力",
+  "違いを活かし響き合う力","バランスを整える力","物事を調和させる力","心を尽くして向き合う力",
+  "願いを実現へ導く力","形にして仕上げる力","とらわれを手放す力","力を合わせて創る力","ただそこにいる力"
+];
+
 function getTodayTheme() {
   const dow = new Date().getDay(); // 0=日 ... 6=土
   return weekdayThemes[dow];
 }
+
+// ===== 大アルカナ（タロット）22枚 =====
+const TAROT_IMG_BASE_PATH = "images/tarot/";
+
+const majorArcana = [
+  { id: "0",    jp: "愚者",         en: "The Fool",           img: "major_00_fool.jpg",            upright: "新しい一歩を、恐れず踏み出せる日。",           reversed: "向こう見ずな判断は、一呼吸おいて。",           detailUpright: "先のことは分からなくても、まずは一歩を踏み出してみる勇気が試されています。", detailReversed: "勢いだけで動く前に、一度状況を整理してみてください。" },
+  { id: "I",    jp: "魔術師",       en: "The Magician",       img: "major_01_magician.jpg",        upright: "意志を形にする力が満ちています。",             reversed: "力はあるのに、空回りしやすい気配。",           detailUpright: "アイデアも道具も、すでにあなたの手の中に揃っています。", detailReversed: "気持ちが先走っていないか、一度立ち止まって確かめてみてください。" },
+  { id: "II",   jp: "女教皇",       en: "The High Priestess", img: "major_02_high_priestess.jpg",  upright: "静かな直感が、答えを知っています。",           reversed: "直感より、情報に振り回されがちに。",           detailUpright: "答えを急がず、静かな時間の中で耳を澄ませてみてください。", detailReversed: "外の声より、自分の内側の感覚を思い出してみてください。" },
+  { id: "III",  jp: "女帝",         en: "The Empress",        img: "major_03_empress.jpg",         upright: "何もしなくても、満たされていく豊かさ。",       reversed: "豊かさに寄りかかりすぎる注意を。",             detailUpright: "与えられることに、遠慮しなくていい日です。", detailReversed: "受け取るだけでなく、自分からも与えるバランスを意識してみてください。" },
+  { id: "IV",   jp: "皇帝",         en: "The Emperor",        img: "major_04_emperor.jpg",         upright: "揺るがない意志が、道を切り拓きます。",         reversed: "頑なさが、周囲との摩擦を生むかも。",           detailUpright: "土台をしっかり固めることが、この先の自由につながります。", detailReversed: "自分のやり方に固執せず、少し力を抜いてみてください。" },
+  { id: "V",    jp: "教皇",         en: "The Hierophant",     img: "major_05_hierophant.jpg",      upright: "受け継がれた知恵が、支えになる日。",           reversed: "型にとらわれず、自分なりの答えを。",           detailUpright: "誰かの経験や知恵を、素直に受け取ってみるといいかもしれません。", detailReversed: "教わったことをそのまま守るより、自分の実感を大切にしてみてください。" },
+  { id: "VI",   jp: "恋人",         en: "The Lovers",         img: "major_06_lovers.jpg",          upright: "心が導く方へ、選んで大丈夫。",               reversed: "価値観のずれに、少し戸惑うかも。",             detailUpright: "頭で考えるより、心が惹かれる方を信じてみてください。", detailReversed: "無理に一致させようとせず、違いをそのまま受け止めてみてください。" },
+  { id: "VII",  jp: "戦車",         en: "The Chariot",        img: "major_07_chariot.jpg",         upright: "迷いを振り切り、前へ進む勢い。",               reversed: "勢いが先走り、制御を失いやすく。",             detailUpright: "多少強引でも、勢いに乗って進む価値がありそうです。", detailReversed: "スピードを落として、進む方向を確かめ直す時間も必要です。" },
+  { id: "VIII", jp: "力",           en: "Strength",           img: "major_08_strength.jpg",        upright: "静かな強さが、状況を包み込みます。",           reversed: "自信が揺らぎ、力みが出やすい日。",             detailUpright: "力ずくでなく、優しさと粘り強さで乗り越えられそうです。", detailReversed: "無理に強がらず、弱さを認めることも一つの強さです。" },
+  { id: "IX",   jp: "隠者",         en: "The Hermit",         img: "major_09_hermit.jpg",          upright: "一人の時間が、大切な光を灯します。",           reversed: "閉じこもりすぎて、孤立しないよう。",           detailUpright: "誰かに答えを求めるより、まず自分自身に問いかけてみてください。", detailReversed: "一人の時間も大切ですが、誰かとの繋がりも忘れずにいてください。" },
+  { id: "X",    jp: "運命の輪",     en: "Wheel of Fortune",   img: "major_10_wheel_of_fortune.jpg",upright: "巡り来る転機を、素直に受け取って。",           reversed: "流れが止まって見えても、通過点。",             detailUpright: "巡り合わせに身を任せると、思わぬ流れに乗れそうです。", detailReversed: "今の停滞も、次の巡り合わせへの準備期間かもしれません。" },
+  { id: "XI",   jp: "正義",         en: "Justice",            img: "major_11_justice.jpg",         upright: "誠実な判断が、均衡をもたらします。",           reversed: "偏った見方に、気づきにくい日。",               detailUpright: "感情より、事実と筋道を大切にしたい一日です。", detailReversed: "一方の意見だけでなく、別の視点にも目を向けてみてください。" },
+  { id: "XII",  jp: "吊るされた男", en: "The Hanged Man",     img: "major_12_hanged_man.jpg",      upright: "視点を変えると、見える景色がある。",           reversed: "我慢が、報われにくく感じる日。",               detailUpright: "今は動けない時期だとしても、それ自体に意味があります。", detailReversed: "耐えることだけが答えとは限らないと、心に留めておいてください。" },
+  { id: "XIII", jp: "死神",         en: "Death",              img: "major_13_death.jpg",           upright: "手放すことが、次の始まりになる。",             reversed: "変化への抵抗が、足踏みの原因に。",             detailUpright: "終わりを恐れるより、次に向かう準備だと捉えてみてください。", detailReversed: "変わりたくない気持ちも自然なもの。無理に急がなくて大丈夫です。" },
+  { id: "XIV",  jp: "節制",         en: "Temperance",         img: "major_14_temperance.jpg",      upright: "心と心の間に、自然な調和が生まれる。",         reversed: "バランスが少し崩れやすい兆し。",               detailUpright: "急がず、ちょうどいい配分を探ってみてください。", detailReversed: "やりすぎている部分がないか、一度見直してみてください。" },
+  { id: "XV",   jp: "悪魔",         en: "The Devil",          img: "major_15_devil.jpg",           upright: "執着に気づくことが、最初の一歩。",             reversed: "縛られていたものから、解き放たれる兆し。",     detailUpright: "何にとらわれているのか、一度立ち止まって見つめてみてください。", detailReversed: "手放す準備が、思ったより整っているのかもしれません。" },
+  { id: "XVI",  jp: "塔",           en: "The Tower",          img: "major_16_tower.jpg",           upright: "崩れることで、本当の景色が見える。",           reversed: "崩壊を恐れて、動けずにいるかも。",             detailUpright: "予想外の出来事も、後から振り返れば必要な転機だったと分かるかもしれません。", detailReversed: "壊れることを恐れるより、今のままの方が苦しくないか考えてみてください。" },
+  { id: "XVII", jp: "星",           en: "The Star",           img: "major_17_star.jpg",            upright: "静かな希望が、心に灯り続けています。",         reversed: "希望が、まだ見えにくい時期かも。",             detailUpright: "焦らなくても、光は少しずつ差し込んでいます。", detailReversed: "見えないだけで、光は静かに近づいているのかもしれません。" },
+  { id: "XVIII",jp: "月",           en: "The Moon",           img: "major_18_moon.jpg",            upright: "揺れる感情も、大切なメッセージ。",             reversed: "霧が晴れ、不安の輪郭がはっきりと。",           detailUpright: "はっきりしない不安も、今のあなたに必要な感覚かもしれません。", detailReversed: "何に不安を感じていたのか、輪郭が見えてくる頃合いです。" },
+  { id: "XIX",  jp: "太陽",         en: "The Sun",            img: "major_19_sun.jpg",             upright: "素直な歓びが、まっすぐ満ちる日。",             reversed: "喜びが、少し曇りがちな一時期。",               detailUpright: "素直な気持ちを、そのまま表に出してみてください。", detailReversed: "小さな楽しみを見つけることが、気持ちを軽くしてくれそうです。" },
+  { id: "XX",   jp: "審判",         en: "Judgement",          img: "major_20_judgement.jpg",       upright: "目覚めと共に、新しい一歩が始まる。",           reversed: "再出発の前に、もう少し考える時間を。",         detailUpright: "過去の経験が、次の一歩を後押ししてくれそうです。", detailReversed: "焦って動き出すより、納得できるまで考える時間を持ってください。" },
+  { id: "XXI",  jp: "世界",         en: "The World",          img: "major_21_world.jpg",           upright: "ひとつの物語が、美しく完成する日。",           reversed: "完成まで、あと少しの道のり。",                 detailUpright: "ひと区切りがついたことを、静かに味わってみてください。", detailReversed: "ゴールは近くにあります。もう少しだけ丁寧に進めてみてください。" },
+];
 
 // ---------- UI操作 ----------
 
@@ -558,6 +661,75 @@ todayTheme.images.forEach(img => {
   });
   imgContainer.appendChild(div);
 });
+
+// ----- タロットカード：タップ→カウントダウン→タップして受け取る -----
+let tarotResult = null; // 確定した抽選結果（未抽選なら null）
+let tarotAwaitingReveal = false;
+
+const tarotCardOuter = document.getElementById("tarotCardOuter");
+const tarotCard = document.getElementById("tarotCard");
+const tarotCountdown = document.getElementById("tarotCountdown");
+const tarotCountdownNum = document.getElementById("tarotCountdownNum");
+const tarotDrawBtn = document.getElementById("tarotDrawBtn");
+const tarotStatus = document.getElementById("tarotStatus");
+const tarotArtWrap = document.getElementById("tarotArtWrap");
+const tarotArtImg = document.getElementById("tarotArtImg");
+const tarotNameJp = document.getElementById("tarotNameJp");
+const tarotNameEn = document.getElementById("tarotNameEn");
+const tarotOrient = document.getElementById("tarotOrient");
+
+function runTarotDraw() {
+  tarotDrawBtn.disabled = true;
+  tarotDrawBtn.classList.add("hidden");
+  tarotStatus.textContent = "";
+  tarotCountdownNum.classList.remove("tarot-ready");
+  tarotCountdownNum.textContent = "5";
+  tarotCountdown.classList.add("active");
+  let n = 5;
+
+  const timer = setInterval(() => {
+    n -= 1;
+    if (n > 0) {
+      tarotCountdownNum.textContent = n;
+    } else {
+      clearInterval(timer);
+      tarotCountdownNum.innerHTML = '<span class="tarot-ready-word">タップして<br>受け取る</span>';
+      tarotAwaitingReveal = true;
+      tarotStatus.textContent = "カードをタップしてください";
+    }
+  }, 750);
+}
+
+function revealTarotCard() {
+  if (!tarotAwaitingReveal) return;
+  tarotAwaitingReveal = false;
+  tarotCountdown.classList.remove("active");
+
+  const card = majorArcana[Math.floor(Math.random() * majorArcana.length)];
+  const reversed = Math.random() < 0.5;
+  const meaning = reversed ? card.reversed : card.upright;
+  const orientLabel = reversed ? "逆位置" : "正位置";
+
+  tarotResult = {
+    jp: card.jp, en: card.en, reversed: reversed, meaning: meaning,
+    detail: reversed ? card.detailReversed : card.detailUpright,
+    resultText: `${card.jp}（${orientLabel}） ― ${meaning}`
+  };
+
+  tarotArtImg.src = TAROT_IMG_BASE_PATH + card.img;
+  tarotArtImg.alt = card.jp;
+  tarotArtWrap.classList.toggle("reversed", reversed);
+  tarotNameJp.textContent = card.jp;
+  tarotNameEn.textContent = card.en;
+  tarotOrient.textContent = orientLabel;
+  tarotOrient.className = "tarot-orient" + (reversed ? " reversed" : "");
+
+  tarotCard.classList.add("flipped");
+  tarotStatus.textContent = "";
+}
+
+tarotDrawBtn.addEventListener("click", runTarotDraw);
+tarotCardOuter.addEventListener("click", revealTarotCard);
 
 document.getElementById("rollDiceBtn").addEventListener("click", () => {
   const redEl = document.getElementById("redDice");
@@ -644,6 +816,7 @@ document.getElementById("submitBtn").addEventListener("click", () => {
   if (!luckyNum || luckyNum < 1 || luckyNum > 12) { alert("好きな数字（1〜12）を入力してください"); return; }
   if (!selectedImage) { alert("画像を1枚選んでください"); return; }
   if (!redValue || !blueValue) { alert("サイコロを振ってください"); return; }
+  if (!tarotResult) { alert("タロットカードを引いてください"); return; }
   const selectedImageData = todayTheme.images.find(i => i.key === selectedImage);
   const blood = bloodEl.value;
   const zodiac = getZodiac(m, d);
@@ -698,45 +871,35 @@ document.getElementById("submitBtn").addEventListener("click", () => {
         <p class="score-points">運勢スコア：<span class="big">${myRanking.score}</span> / 100点</p>
       </div>
 
-      <p>こんにちは。今日のあなたのために、星と数字とマヤの暦を読み解いてみました。少し長いお手紙になりますが、最後まで読んでいただけたら嬉しいです。</p>
+      <p>今日のあなたを、星と数字とマヤの暦から読み解きました。</p>
 
       <div class="section">
         <h2>あなたという人について</h2>
-        <p>${zodiac}生まれで${blood}型のあなたは、${bloodTypeText[blood]}好きな数字「${luckyNum}」を選んだあなたは、きっとその数字に何か特別な響きを感じているのではないでしょうか。数字には、その人だけの意味が宿っていることがあります。</p>
+        <p>${zodiac}×${blood}型――${bloodTypeText[blood]}</p>
       </div>
 
       <div class="section">
-        <h2>マヤの暦が語る、あなたの本質（KIN${kin}）</h2>
-        <p>あなたが生まれた日、宇宙には「${sunSeal}」のエネルギーが流れていました。これはあなたが表向きに発揮している、いわば顕在的な性質です。そしてその奥には「${waveSpell}」という、もう一つの顔が眠っています。これは普段あまり意識されない、潜在的な才能。誰かに指摘されてはじめて「そうかもしれない」と気づくような、隠れた一面かもしれません。</p>
-        <p>さらに、あなたには「音${toneNum}（${tone}）」というエネルギーの使い方の傾向も刻まれています。表の性質と、奥に眠る才能と、エネルギーの流し方。この3つが重なり合って、唯一無二のあなたという人をかたちづくっているのです。</p>
+        <h2>マヤ暦（KIN${kin}）</h2>
+        <p>表の顔:${sunSeal} ―${sunSealMeanings[sealIdx-1]}<br>隠れた才能:${waveSpell} ―${sunSealMeanings[wsIdx-1]}<br>エネルギーの型:音${toneNum} ―${toneMeanings[toneNum-1]}</p>
       </div>
 
       <div class="section">
-        <h2>数秘術が語る、あなたの人生のテーマ</h2>
-        <p>生年月日の数字をすべて足し合わせていくと、あなたのライフパスナンバーは「${lifePath}」になりました。${lifePathDesc}</p>
-        <p>これは今日だけの話ではなく、あなたがこれから歩んでいく人生全体に流れているテーマです。ふとした瞬間に、この数字の力を思い出してみてください。</p>
-      </div>
-
-      <div class="section">
-        <h2>今日選んでいただいた「${todayTheme.name}」について</h2>
-        <p>${selectedImageData.comment}</p>
+        <h2>数秘術・ライフパス「${lifePath}」</h2>
+        <p>${lifePathDesc}</p>
       </div>
 
       <div class="section highlight">
-        <h2>今日、特に大切にしてほしいこと</h2>
-        <p>あなたの本質と、今日という日が重なり合うところに、「${red.theme}」が${red.intensity}く動く気配が見えています。そして「${blue.theme}」という視点が、今日のあなたにとって大きな鍵になりそうです。</p>
-        <p>${guidance.trigger}そのとき、${guidance.choice}</p>
-        <p>${luckyItem}</p>
+        <h2>今日のあなたへ</h2>
+        <p>🖼️ 画像:${selectedImageData.comment}</p>
+        <p>${redThemeEmoji[red.theme]} ${red.theme}:${guidance.trigger}${guidance.choice}</p>
+        <p>✅ 行動:${actionGuidance.active}</p>
+        <p>⚠️ 注意:${actionGuidance.passive}</p>
       </div>
 
       <div class="section">
-        <h2>今日、積極的に動くといいこと</h2>
-        <p>${actionGuidance.active}</p>
-      </div>
-
-      <div class="section">
-        <h2>今日、あまり深追いせず静観したほうがいいこと</h2>
-        <p>${actionGuidance.passive}</p>
+        <h2>今日のタロット</h2>
+        <p>🔮 ${tarotResult.resultText}</p>
+        <p>${tarotResult.detail}</p>
       </div>
 
       <div class="section">
@@ -744,12 +907,7 @@ document.getElementById("submitBtn").addEventListener("click", () => {
         <p class="keyword">${keyword.en} <span class="keyword-ja">（${keyword.ja}）</span></p>
       </div>
 
-      <div class="section">
-        <h2>今日の${timeOfDay}に、そっと心にとめておいてほしいこと</h2>
-        <p>${timeMessage}</p>
-      </div>
-
-      <p class="closing">今日という日が、あなたにとって少しでも優しいものになりますように。<br>また明日、お会いしましょう。<br><span class="signature">— Sumiko</span></p>
+      <p class="closing">よい一日を。また明日🔮<br><span class="signature">― Sumiko</span></p>
     </div>
 
     <div id="shareCard">
@@ -757,7 +915,7 @@ document.getElementById("submitBtn").addEventListener("click", () => {
       <div class="share-stats">
         <span>${zodiac} ${myRanking.rank}位／12星座</span>
         <span>運勢スコア ${myRanking.score}点</span>
-        <span>KIN${kin}・${sunSeal}</span>
+        <span>KIN${kin}・${sunSeal}／${waveSpell}</span>
       </div>
       <p class="share-keyword">${keyword.en}（${keyword.ja}）</p>
       <p class="share-msg">${shareMsg}</p>
@@ -808,7 +966,7 @@ document.getElementById("submitBtn").addEventListener("click", () => {
     ctx.fillStyle = "#cbd5e1";
     ctx.font = "15px sans-serif";
     ctx.fillText(`${zodiac}　${myRanking.rank}位 / 12星座　運勢スコア ${myRanking.score}点`, 24, 82);
-    ctx.fillText(`KIN${kin}・${sunSeal}`, 24, 104);
+    ctx.fillText(`KIN${kin}・${sunSeal}／${waveSpell}`, 24, 104);
 
     // キーワード
     ctx.fillStyle = "#a78bfa";
@@ -843,7 +1001,7 @@ document.getElementById("submitBtn").addEventListener("click", () => {
     return canvas;
   }
 
-  const tweetText = `今日の占い結果🔮\n${xAccountLabel}\n${zodiac} ${myRanking.rank}位／12星座　運勢スコア${myRanking.score}点\nKIN${kin}・${sunSeal}\nキーワード：${keyword.en}（${keyword.ja}）\n${shareMsg}\n#Sumiko占い`;
+  const tweetText = `今日の占い結果🔮\n${xAccountLabel}\n${zodiac} ${myRanking.rank}位／12星座　運勢スコア${myRanking.score}点\nKIN${kin}・${sunSeal}／${waveSpell}\nキーワード：${keyword.en}（${keyword.ja}）\n${shareMsg}\n#Sumiko占い`;
 
   if (canShare) {
     // スマホ：Web Share APIボタン1つ
@@ -889,6 +1047,11 @@ document.getElementById("submitBtn").addEventListener("click", () => {
     document.getElementById("diceArea").classList.add("hidden");
     document.getElementById("redDice").querySelector(".dice-num").textContent = "?";
     document.getElementById("blueDice").querySelector(".dice-num").textContent = "?";
+    tarotCard.classList.remove("flipped");
+    tarotDrawBtn.classList.remove("hidden");
+    tarotDrawBtn.disabled = false;
+    tarotStatus.textContent = "";
+    tarotResult = null;
   });
 
   // PC用ボタン
